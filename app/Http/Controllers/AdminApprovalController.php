@@ -49,6 +49,7 @@ class AdminApprovalController extends Controller
                     } else {
                         $file_name = $current_counter_file;
                     }
+                    File::move($image_file, $directory . "/" . "photo_profile/" . $file_name);
                 } else {
                     $file_name = $direct_file;
                 }
@@ -56,7 +57,6 @@ class AdminApprovalController extends Controller
                 $author_data["photo_profile_link"] = $image_url_directory;
                 $author_data["photo_profile_name"] = $file_name;
                 $author_data["photo_profile_path"] = preg_replace("/\s+/", "", strtolower("storage/photo_profile"));
-                File::move($image_file, $directory . "/" . "photo_profile/" . $file_name);
                 try {
                     AdminApproval::create($author_data);
                 } catch (\Illuminate\Database\QueryException $e) {
@@ -72,7 +72,7 @@ class AdminApprovalController extends Controller
     public function listAdminApproval()
     {
         $listdmin = DB::table("admin_approval")->join("users", "users.id", "=", "admin_approval.user_id")
-            ->select("admin_approval.*", "users.name")->get();
+            ->select("admin_approval.*", "users.name", "users.email")->get();
         return response()->json(["admin_approval" => $listdmin], 200);
     }
 }

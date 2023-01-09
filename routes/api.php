@@ -9,7 +9,9 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\SubTopicController;
 use App\Http\Controllers\AdminApprovalController;
 use App\Http\Controllers\AdminNewsApprovalController;
+use App\Http\Controllers\ApprovalEmailNotificationController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\NewsApprovalEmailNotificationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 /*
@@ -50,7 +52,7 @@ Route::post('/registeradmin', [UserController::class, 'registerAdmin']);
 Route::get("/authors", [UserController::class, "showAllAuthors"]);
 // News Routes
 Route::get("news/topics", [NewsController::class, "showNewsByTopics"]);
-Route::get("news/topics/{topic_slug}", [NewsController::class, "showNewsByTopic"]); //Show news by a topic
+Route::get("news/topics/{topic_slug}", [NewsController::class, "showNewsByOneTopic"]); //Show news by a topic
 Route::get("news/topics/sub_topics/{sub_topic_slug}", [NewsController::class, "showNewsBySubTopicsAndTopics"]);
 Route::get("news/open_news/{news_slug}", [NewsController::class, "readingNews"]);
 Route::get("news/user/{id}", [NewsController::class, "showNewsByUserId"]);

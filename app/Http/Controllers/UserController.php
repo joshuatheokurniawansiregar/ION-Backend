@@ -174,7 +174,10 @@ class UserController extends Controller
                 return response()->json($validator->errors()->toJson(), 422);
             } else {
                 $user = User::find($user_id);
-                $user->update(["balance_account_number" => $request->account_number]);
+                $user->update([
+                    "balance_account_number" => $request->account_number,
+                    "balance" => 0.00,
+                ]);
                 return response("Your money receiving account has created", 202);
             }
         }

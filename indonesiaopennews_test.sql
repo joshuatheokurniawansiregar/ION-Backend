@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 26 Des 2022 pada 16.41
+-- Waktu pembuatan: 09 Jan 2023 pada 09.58
 -- Versi server: 10.4.21-MariaDB
 -- Versi PHP: 8.0.10
 
@@ -29,10 +29,10 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `admin_approval` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `author_description` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `photo_profile_link` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `photo_profile_name` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `photo_profile_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `author_description` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `photo_profile_link` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `photo_profile_name` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `photo_profile_path` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `join_at` bigint(20) UNSIGNED NOT NULL,
   `user_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -46,10 +46,10 @@ CREATE TABLE `admin_approval` (
 CREATE TABLE `admin_news_approval` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `news_title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `news_content` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `news_slug` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `news_picture_link` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `news_picture_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `news_content` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `news_slug` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `news_picture_link` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `news_picture_name` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
   `news_picture_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `sub_topic_id` bigint(20) UNSIGNED DEFAULT NULL,
   `user_id` bigint(20) UNSIGNED DEFAULT NULL
@@ -122,10 +122,10 @@ CREATE TABLE `news` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `news_title` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `news_content` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `news_slug` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `news_picture_link` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `news_picture_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `news_picture_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `news_slug` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `news_picture_link` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `news_picture_name` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `news_picture_path` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `added_at` bigint(20) UNSIGNED NOT NULL,
   `updated_at` bigint(20) DEFAULT NULL,
   `news_status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -138,8 +138,7 @@ CREATE TABLE `news` (
 --
 
 INSERT INTO `news` (`id`, `news_title`, `news_content`, `news_slug`, `news_picture_link`, `news_picture_name`, `news_picture_path`, `added_at`, `updated_at`, `news_status`, `sub_topic_id`, `user_id`) VALUES
-(4, 'Ayo', 'testsss1m', 'ayo', 'http://127.0.0.1:8000/storage/news_image/02.JPG', '02.JPG', 'storage/news_image', 1671976778008, NULL, 'Paid', 2, 2),
-(5, 'Ayo', 'testsss1m', 'ayo', 'http://127.0.0.1:8000/storage/news_image/02_1.JPG', '02_1.JPG', 'storage/news_image', 1671980850170, NULL, 'Paid', 2, 2);
+(49, 'Pengganti Mychell Chagas Sudah Kawal PSS Sleman Di Bantul, Seto Bicara Proses Adaptasi', 'INDOSPORT.COM - PSS Sleman sudah mendapatkan pengganti Mychell Chagas untuk putaran kedua Liga 1 2022/2023. Bomber asal Ukraina, Yevhen Bokhashvili, nongol saat PSS melawan Persija Jakarta di Stadion Sultan Agung, Bantul, Minggu (08/01/23).\r\n\r\nPSS merombak jajaran pemain asing pada putaran kedua ini. Selain bomber asal Brasil, Mychell Chagas, PSS juga berpisah dengan gelandang asal Portugal, Ze Valente.\r\n\r\nMasa depan Tallyson Duarte dan Jihad Ayoub juga masih tanda tanya. Duarte absen sepanjang sistem bubble Liga 1 karena mengalami cedera.\r\n\r\nSementara Jihad Ayoub masih tampil saat menghadapi Persija. Pemain berbadan tinggi besar itu bermain penuh saat PSS kalah 0-2 pada laga tunda pekan ke-17 Liga 1.\r\n\r\nMenariknya, dalam laga itu ada sosok spesial di tribun barat. Yevhen yang pernah berjaya bersama PSS pada Liga 1 2019 sudah duduk manis menyaksikan laga ini bersama Irkham Zahrul Milla dkk.\r\n\r\nBaca Juga Liga 1: Seto Ungkap 2 Penyebab PSS Sleman Kalah dari Persija Jakarta\r\nADVERTISEMENT\r\n\r\n\r\nKehadiran Yevhen pun menjadi sinyal kuat bahwa mantan pilar Persipura Jayapura ini akan bergabung lagi. Pada Liga 1 2019 lalu, Yevhen mencatatkan 16 gol dari 33 penampilan.\r\n\r\nSinyal bertambah kencang ketika Yevhen bersalaman dengan seluruh pemain PSS saat hendak naik bus seusai laga. Yevhen sendiri datang ke stadion dengan mobil terpisah bersama staf PSS.\r\n\r\nBaca Juga Taklukkan PSS Sleman di Laga Tunda Liga 1, Pelatih Persija: Awal Indah di Tahun 2023!\r\nTerkait keberadaan pemain baru, pelatih PSS, Seto Nurdiyantoro, belum mau bersuara. Ia baru akan memberi keterangan ketika manajemen PSS sudah meresmikan secara langsung ke publik.\r\n\r\n\r\n\"(Pemain baru) masih dibungkus. Kita tunggu dulu dari manajemen,\" kata Seto usai laga melawan Persija, Minggu (08/01/23) petang.\r\n\r\nBaca selengkapnya: https://www.indosport.com/sepakbola/20230109/pengganti-mychell-chagas-sudah-kawal-pss-sleman-di-bantul-seto-bicara-proses-adaptasi', 'pengganti-mychell-chagas-sudah-kawal-pss-sleman-di-bantul,-seto-bicara-proses-adaptasi-fb530b4', 'http://127.0.0.1:8000/storage/news_image/000181100_1612094311-Timnas_Indonesia_-_Asnawi_Mangkualam__Egy_Maulana_Vikri__Elkan_Baggott_1.jpg', '000181100_1612094311-Timnas_Indonesia_-_Asnawi_Mangkualam__Egy_Maulana_Vikri__Elkan_Baggott_1.jpg', 'storage/news_image', 1673251749179, NULL, 'Paid', 7, 2);
 
 -- --------------------------------------------------------
 
@@ -192,7 +191,12 @@ CREATE TABLE `sub_topics` (
 --
 
 INSERT INTO `sub_topics` (`id`, `sub_topic_title`, `sub_topic_slug`, `added_at`, `updated_at`, `topic_id`) VALUES
-(2, 'Test Test', 'test-test', 1671537941739, 0, 1);
+(2, 'Basket', 'basket', 1672896519610, 0, 1),
+(3, 'MotoGp2023', 'motogp2023', 1672896563839, 0, 2),
+(4, 'Formula 1', 'formula-1', 1672896582236, 0, 2),
+(5, 'Partai Demokrat', 'partai-demokrat', 1672896601470, 0, 3),
+(6, 'Partai Republik Indonesia', 'partai-republik-indonesia', 1672896617762, 1673157110856, 3),
+(7, 'Sepak Bola', 'sepak-bola', 1673247101129, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -213,14 +217,9 @@ CREATE TABLE `topics` (
 --
 
 INSERT INTO `topics` (`id`, `topic_title`, `topic_slug`, `added_at`, `updated_at`) VALUES
-(1, 'Aye', 'aye', 1671537866547, 0),
-(2, 'Test Topic', 'test-topic', 1671877263791, 0),
-(3, 'Test Topic 1', 'test-topic-1', 1671877731948, 0),
-(4, 'Test Topic 2', 'test-topic-2', 1671877734856, 0),
-(5, 'Test Topic 3', 'test-topic-3', 1671877737879, 0),
-(6, 'Test Topic 4', 'test-topic-4', 1671877741733, 0),
-(7, 'Test Topic 5', 'test-topic-5', 1671877746501, 0),
-(8, 'Test Topic 6', 'test-topic-6', 1671877750489, 0);
+(1, 'Olahraga', 'olahraga', 1672896340094, 0),
+(2, 'Otomotif', 'otomotif', 1672896391756, 0),
+(3, 'Politik', 'politik', 1672896409753, 0);
 
 -- --------------------------------------------------------
 
@@ -235,8 +234,8 @@ CREATE TABLE `users` (
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `author_description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `role` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `balance_account_numer` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `balance` double UNSIGNED DEFAULT NULL,
+  `balance_account_number` bigint(20) DEFAULT NULL,
+  `balance` double(12,2) UNSIGNED DEFAULT NULL,
   `photo_profile_link` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `photo_profile_name` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `photo_profile_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -250,10 +249,11 @@ CREATE TABLE `users` (
 -- Dumping data untuk tabel `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `password`, `author_description`, `role`, `balance_account_numer`, `balance`, `photo_profile_link`, `photo_profile_name`, `photo_profile_path`, `email_verified_at`, `remember_token`, `created_at`, `updated_at`) VALUES
-(2, 'Joshua Theo Kurniawan Siregar', 'joshua@gmail.com', 'password', 'Hi my name is Joshua Theo Kurniawan. I have hobby namely playing game and singing.', 'author', NULL, NULL, 'http://127.0.0.1:8000/storage/photo_profile/01_1.JPG', '01_1.JPG', 'storage/photo_profile', NULL, NULL, '2022-12-23 06:19:32', '2022-12-25 07:10:37'),
-(3, 'test', 'joshuatest@gmail.com', 'joshuatheokur', 'Hi my name is Joshua Theo Kurniawan. I have hobby namely playing game and singing.', 'author', NULL, NULL, 'http://127.0.0.1:8000/storage/photo_profile/adminfix.jpg', 'adminfix.jpg', 'storage/photo_profile', NULL, NULL, '2022-12-25 08:30:31', '2022-12-25 08:32:22'),
-(4, 'Test User', 'test@example.com', 'adminssss', NULL, 'admin', NULL, NULL, NULL, NULL, NULL, '2022-12-25 20:55:36', 'cq5Kapwwuf', '2022-12-25 20:55:42', '2022-12-25 20:55:42');
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `author_description`, `role`, `balance_account_number`, `balance`, `photo_profile_link`, `photo_profile_name`, `photo_profile_path`, `email_verified_at`, `remember_token`, `created_at`, `updated_at`) VALUES
+(1, 'Test User', 'test@example.com', 'adminssss', NULL, 'admin', NULL, NULL, NULL, NULL, NULL, '2023-01-04 21:52:17', 'gfs2dMUoww', '2023-01-04 21:52:18', '2023-01-04 21:52:18'),
+(2, 'Baihaqiadnan', 'baiadnan123@gmail.com', '123456789', 'My name is M. Baihaqi Adnan. I was born in Kuala Lumpur. I have hobby in reading and writing.', 'author', 123456671222, 10000.00, 'http://127.0.0.1:8000/storage/photo_profile/hannah-busing-vGHMXnD5A0I-unsplash_1_1.jpg', 'hannah-busing-vGHMXnD5A0I-unsplash_1_1.jpg', 'storage/photo_profile', NULL, NULL, '2023-01-04 22:32:42', '2023-01-09 01:08:20'),
+(3, 'Joshua Theo Kurniawan Siregar', 'joshuatheo18@gmail.com', 'helloworld', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2023-01-06 06:46:38', '2023-01-06 06:46:38'),
+(4, 'Joshua Theo Kurniawan Sirgar', 'joshuatheo19@gmail.com', 'helloworld123', 'Hello my name is Joshua Theo Kurniawan Siregar. I\'m realy interested to join as an author in this website.', NULL, NULL, NULL, 'http://127.0.0.1:8000/storage/photo_profile/hannah-busing-vGHMXnD5A0I-unsplash_2_1_1.jpg', 'hannah-busing-vGHMXnD5A0I-unsplash_2_1_1.jpg', 'storage/photo_profile', NULL, NULL, '2023-01-06 17:52:29', '2023-01-07 20:50:22');
 
 --
 -- Indexes for dumped tables
@@ -339,7 +339,7 @@ ALTER TABLE `topics`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `users_email_unique` (`email`),
-  ADD UNIQUE KEY `users_balance_account_numer_unique` (`balance_account_numer`);
+  ADD UNIQUE KEY `users_balance_account_numer_unique` (`balance_account_number`);
 
 --
 -- AUTO_INCREMENT untuk tabel yang dibuang
@@ -349,13 +349,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT untuk tabel `admin_approval`
 --
 ALTER TABLE `admin_approval`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT untuk tabel `admin_news_approval`
 --
 ALTER TABLE `admin_news_approval`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT untuk tabel `failed_jobs`
@@ -379,7 +379,7 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT untuk tabel `news`
 --
 ALTER TABLE `news`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT untuk tabel `personal_access_tokens`
@@ -391,13 +391,13 @@ ALTER TABLE `personal_access_tokens`
 -- AUTO_INCREMENT untuk tabel `sub_topics`
 --
 ALTER TABLE `sub_topics`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT untuk tabel `topics`
 --
 ALTER TABLE `topics`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`

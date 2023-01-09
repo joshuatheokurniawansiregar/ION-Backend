@@ -11,14 +11,24 @@ use App\Models\AdminNewsApproval;
 use App\Models\SubTopics;
 use App\Models\User;
 use App\Models\News;
+use App\Models\Topics;
 
 class AdminNewsApprovalController extends Controller
 {
+    private string $randomTitle = "";
+    public function __construct()
+    {
+        $characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        $randomstring = substr(md5(str_shuffle($characters)), 0, 7);
+        $this->randomTitle = $randomstring;
+    }
+    public function getRandomTitle(): string
+    {
+        return $this->randomTitle;
+    }
     public function makeApproval(Request $request, $user_id)
     {
-        // $date_now = round(microtime(true) * 1000);
         $response = null;
-        $characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         $image_file = $request->file("image_file");
         $file_name = $image_file->getClientOriginalName();
         $direct_file = $image_file->getClientOriginalName();
@@ -35,7 +45,8 @@ class AdminNewsApprovalController extends Controller
         ]);
         $news_data["news_title"] = $news_title;
         $news_data["news_content"] = $news_content;
-        $news_data["news_slug"] = preg_replace("/\s+/", "-", strtolower($news_title)) . '-' . substr(md5(str_shuffle($characters)), 0, 10);
+        $testobj = new AdminNewsApprovalController();
+        $news_data["news_slug"] = preg_replace("/\s+/", "-", strtolower($news_title)) . '-' . $testobj->getRandomTitle();
         if ($validator->fails()) {
             $response = response()->json(["status" => "Fail", "status_code" => 422, "message" => $validator->errors()], 422);
         }
@@ -77,12 +88,30 @@ class AdminNewsApprovalController extends Controller
     }
     public function showAdminNewsApproval()
     {
-        $approval_list = DB::table("admin_news_approval")->join("users", "users.id", "=", "admin_news_approval.user_id")
+        DB::enableQueryLog();
+        $approval_list = DB::table("admin_news_approval")
+            ->join("users", "users.id", "=", "admin_news_approval.user_id")
             ->join("sub_topics", "sub_topics.id", "=", "admin_news_approval.sub_topic_id")
+            ->join("topics", "topics.id", "=", "sub_topics.topic_id")
             ->where("users.role", "author")
-            ->select("admin_news_approval.id", "admin_news_approval.news_title", "admin_news_approval.news_content", "admin_news_approval.news_picture_link", "admin_news_approval.news_picture_name", "sub_topics.sub_topic_title", "users.name", "users.author_description", "users.photo_profile_link", "users.id as user_id")
+            ->select(
+                "admin_news_approval.id",
+                "admin_news_approval.news_title",
+                "admin_news_approval.news_content",
+                "admin_news_approval.news_picture_link",
+                "admin_news_approval.news_picture_name",
+                "sub_topics.sub_topic_title",
+                "sub_topics.topic_id",
+                "topics.topic_title",
+                "users.name",
+                "users.author_description",
+                "users.photo_profile_link",
+                "users.id as user_id"
+            )
             ->get();
-        return response()->json(["admin_news_approval" => $approval_list, "status_code" => 200], 200);
+        // dd(DB::getQueryLog());
+        // $approval_list_test = DB::select((DB::raw("SELECT `admin_news_approval.*` FROM `admin_news_approval INNER JOIN `")));
+        return response()->json(["admin_news_approval" => $approval_list, "topics" => "", "status_code" => 200], 200);
     }
     public function updateBalance(int $user_id)
     {

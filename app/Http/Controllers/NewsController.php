@@ -12,9 +12,8 @@ use App\Models\SubTopics;
 use App\Models\AdminNewsApproval;
 use App\Models\User;
 use App\Http\Controllers\Controller as Controller;
-use App\Models\AdminApproval;
+use App\Notifications\EmailNewsApprovalNotification;
 use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 // Eager: Join
 // Lazy: Not Join
@@ -45,6 +44,11 @@ class NewsController extends Controller
     // }
 
     //Admin
+    public function __construct()
+    {
+        $this->middleware('throttle:1,0.3', ['except' => ['update', 'reject', 'showNewsByTopics', 'searchNewsByNewsTitle', 'openNewsPicture', 'checkNewsExist', 'detail', 'showNewsByUserId', 'readingNews', 'showNewsBySubTopicsAndTopics', 'showNewsByOneTopic', 'index']]);
+    }
+
     public function index()
     {
         $news = News::join("users", "users.id", "=", "news.user_id")->select("news.*", "users.name", "users.photo_profile_link")->where("role", "author")->get();
@@ -60,22 +64,24 @@ class NewsController extends Controller
         $news = News::join("users", "users.id", "=", "news.user")->where("news_content", "like", str_replace("%", "", $keywordparam))->get();
         return response()->json($news);
     }
+
     /**
      * @param \Illuminate\Http\Request $request
      */
     public function approve(int $approval_id)
     {
-        $date_now = round(microtime(true) * 1000);
-        if (AdminNewsApproval::where("id", $approval_id)->first() != null) {
-            $admin_approval = AdminNewsApproval::where("id", $approval_id)->first();
-            $news_new = $admin_approval->news_title;
-            $news_content = $admin_approval->news_content;
-            $news_slug = $admin_approval->news_slug;
-            $news_picture_link = $admin_approval->news_picture_link;
-            $news_picture_name = $admin_approval->news_picture_name;
-            $news_picture_path = $admin_approval->news_picture_path;
-            $news_sub_topic_id = $admin_approval->sub_topic_id;
-            $user_id = $admin_approval->user_id;
+        $approval_ids = AdminNewsApproval::findOrFail($approval_id);
+        if ($approval_ids != null) {
+            $date_now = round(microtime(true) * 1000);
+            $approval_ids = AdminNewsApproval::findOrFail($approval_id);
+            $news_new = $approval_ids->news_title;
+            $news_content = $approval_ids->news_content;
+            $news_slug = $approval_ids->news_slug;
+            $news_picture_link = $approval_ids->news_picture_link;
+            $news_picture_name = $approval_ids->news_picture_name;
+            $news_picture_path = $approval_ids->news_picture_path;
+            $news_sub_topic_id = $approval_ids->sub_topic_id;
+            $user_id = $approval_ids->user_id;
             try {
                 $data["news_title"] = $news_new;
                 $data["news_content"] = $news_content;
@@ -87,28 +93,47 @@ class NewsController extends Controller
                 $data["news_status"] = "Paid";
                 $data["sub_topic_id"] = $news_sub_topic_id;
                 $data["user_id"] = $user_id;
+                $user = User::findOrFail($user_id);
+                $email_data = [
+                    "greeting" => "Creating Author Account Approval",
+                    "messages" => "Your request to create news titled " . $approval_ids->news_title
+                        . " was approved, " . $user->name . "." . " You got IDR.10000,00",
+                    "actionText" => "You can create news again by clicking below button",
+                    "actionURL" => "http://localhost:3006/",
+                    "thanks" => "Thank you for your participation",
+                ];
                 $delete_news_approval = AdminNewsApproval::find($approval_id);
-                // $delete_news_approval->delete();
-                News::create($data);
-                $response = response()->json(["approve_news" => $data, "status" => "Succes", "status_code" => 200], 200);
+                $delete_news_approval->delete();
+                $created_news = News::create($data);
+                DB::table('users')
+                    ->where('id', $approval_ids->user_id)
+                    ->update([
+                        'balance' => DB::raw('balance + 10000.00')
+                    ]);
+                $response = response()->json(["approved_news" => $created_news, "status" => "Succes", "status_code" => 200], 200);
             } catch (Exception $excption) {
                 $response = response()->json(["status" => "Failed", $excption->getMessage()]);
             }
         }
         return $response;
     }
-    public function reject($news_title)
+    public function reject(int $approval_id)
     {
-        $admin_approval_news_title = AdminNewsApproval::where("news_title", $news_title)
-            ->select("id", "news_picture_name", "news_picture_path")->get();
-        $json_decode_approval = json_decode($admin_approval_news_title);
-        $id = $json_decode_approval[0]->id;
-        $news_picture_name = $json_decode_approval[0]->news_picture_name;
-        $news_picture_path = $json_decode_approval[0]->news_picture_path;
-        $delete_admin_approval = AdminNewsApproval::findOrFail($id);
+        $delete_admin_approval = AdminNewsApproval::findOrFail($approval_id);
+        $user = User::findOrFail($delete_admin_approval->user_id);
+        $admin_approval_news = AdminNewsApproval::findOrFail($approval_id)
+            ->select("id", "news_picture_name", "news_picture_path")->first();
+        $email_data = [
+            "greeting" => "Creating Author Account Approval",
+            "messages" => "Your request to create news titled " . $delete_admin_approval->news_title . " was rejected, " . $user->name,
+            "actionText" => "You can create news again by clicking this button",
+            "actionURL" => "http://localhost:3006/",
+            "thanks" => "Thank you for your participation",
+        ];
+        $user->notify(new EmailNewsApprovalNotification($email_data));
         $delete_admin_approval->delete();
-        if (File::exists($news_picture_path . "/" . $news_picture_name)) {
-            File::delete($news_picture_path . "/" . $news_picture_name);
+        if (File::exists($admin_approval_news->news_picture_path . "/" . $admin_approval_news->news_picture_name)) {
+            File::delete($admin_approval_news->news_picture_path . "/" . $admin_approval_news->news_picture_name);
         }
         return response()->json(["admin_approval" => $delete_admin_approval, "status" => "Success", "status_code" => 200, "You have rejected to create an author account"], 200);
     }
@@ -129,11 +154,20 @@ class NewsController extends Controller
     public function showNewsByTopics()
     {
         DB::enableQueryLog();
-        $topics = Topics::with("news")->get();
-        return response()->json($topics, 200);
+        // $distincts = DB::select(DB::raw("SELECT DISTINCT `topic_id` FROM `sub_topics`"));
+        // $arrayOfTopicIdsInSubTopics = array();
+        // for ($i = 0; $i < count($distincts); $i++) {
+        //     $arrayOfTopicIdsInSubTopics[$i] = $distincts[$i]->topic_id;
+        // }
+        $news = Topics::with("news")->get();
+        // $news_test = News::join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")->whereIn("sub_topic_id", $arrayOfTopicIdsInSubTopics)->get();
+        // $topicsByTopicId = Topics::whereIn("id", $arrayOfTopicIdsInSubTopics)->get();
+        // $arrayOfNews = array("" => $topicsByTopicId, "news" => $news_test);
+        // dump(DB::getQueryLog());
+        return response()->json($news, 200);
     }
     // For home page in topic_home, visitor
-    public function showNewsByTopic($topic_slug)
+    public function showNewsByOneTopic($topic_slug)
     {
         DB::enableQueryLog();
 
@@ -148,7 +182,7 @@ class NewsController extends Controller
             ->where("sub_topics.topic_id", $topic->id)
             ->get();
         if ($join_news->count() == 0) {
-            return response(404, "test");
+            return response(404, "Not found");
         }
         return response($join_news, 200);
     }
@@ -193,7 +227,7 @@ class NewsController extends Controller
             ->where("user_id", $id)
             ->get();
         $decode = json_decode($join_news);
-        $topic = Topics::find($decode[0]->topic_id);
+        $topic = Topics::where("id", $join_news->value("topic_id"));
         return response()->json(["news" => $join_news, "topics" => $topic], 200);
     }
     public function readingNews(string $news_slug)
@@ -275,7 +309,7 @@ class NewsController extends Controller
             $image_url_directory = stripslashes($request->schemeAndHttpHost() . "/" . $directory . "/news_image" . "/" . $file_name);
             $data["news_picture_link"] = $image_url_directory;
             $data["news_picture_name"] = $file_name;
-            File::copy($file_image->getPathname(), $directory . "/" . "news_image/" . $file_name);
+            File::move($file_image, $directory . "/" . "news_image/" . $file_name);
             // $request->file('file_image')->move($directory . "/" . "news_image/", $file_name);
             dd('asd');
         }
