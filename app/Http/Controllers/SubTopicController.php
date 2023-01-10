@@ -34,7 +34,8 @@ class SubTopicController extends Controller
     {
         $topic_id = Topics::where("topic_slug", $topic_slug)->first()->id;
         if (SubTopics::where("topic_id", $topic_id)) {
-            $sub_topic = SubTopics::where("topic_id", intval($topic_id))->get();
+            $sub_topic = SubTopics::join("topics", "topics.id", "=", "sub_topics.topic_id")->where("topic_id", intval($topic_id))
+                ->select("sub_topics.*", "topics.topic_title", "topics.topic_slug")->get();
             return response($sub_topic, 202);
         } else {
             return abort(404, "Sub topic is not found");

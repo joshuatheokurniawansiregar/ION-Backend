@@ -59,6 +59,7 @@ Route::get("news/user/{id}", [NewsController::class, "showNewsByUserId"]);
 Route::get("news", [NewsController::class, "index"]);
 Route::get("news/update/{id}", [NewsController::class, "detail"]);
 Route::get("/news/exists_or_not/{user_id}", [NewsController::class, "checkNewsExist"]);
+Route::get("/news/relate_news/{sub_topic_slug}", [NewsController::class, "showRelatedNews"]);
 Route::get("news/openpicture/{news_id}", [NewsController::class, "openNewsPicture"]); //Take blob
 Route::get("news/search_news/{keywordparam}", [NewsController::class, "searchNewsByNewsTitle"]);
 // Route::get("news//", [NewsController::class, ""]);
@@ -72,7 +73,7 @@ Route::get("/sub_topics/show_by_id/{id}", [SubTopicController::class, "showById"
 Route::post("/sub_topics", [SubTopicController::class, "store"]);
 Route::put("/sub_topics/{id}", [SubTopicController::class, "update"]);
 Route::delete("/sub_topics/{id}", [SubTopicController::class, "delete"]);
-// Topics Route
+// Topics Routef
 Route::get("/topics", [TopicController::class, "index"]);
 Route::get("/topics/{topic_slug}", [TopicController::class, "show"]);
 Route::get("/topics/showbyid/{id}", [TopicController::class, "showById"]);
@@ -80,7 +81,7 @@ Route::post("/topics", [TopicController::class, "save"]);
 Route::put("/topics/{id}", [TopicController::class, "update"]);
 Route::delete("/topics/{id}", [TopicController::class, "delete"]);
 Route::get("/history/{id}", [HistoryController::class, "index"]);
-Route::post("/history/{user_id}/{news_id}", [HistoryController::class, "store"]);
+Route::post("/history", [HistoryController::class, "store"]);
 Route::delete("/history/{id}", [HistoryController::class, "delete"]);
 
 Route::post("/logout", [AuthController::class, "signout"]);

@@ -14,7 +14,7 @@ class History extends Model
     /**
      * @var bool
      */
-    public $timestamps = true;
+    public $timestamps = false;
 
     /**
      * The attributes that are mass assignable.
@@ -22,11 +22,10 @@ class History extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'created_at',
         'user_id',
         'news_id',
-
     ];
-
 
     public function news()
     {
@@ -36,5 +35,4 @@ class History extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
-
 }

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\File;
 use App\Models\News;
 use App\Models\Topics;
@@ -46,7 +45,7 @@ class NewsController extends Controller
     //Admin
     public function __construct()
     {
-        $this->middleware('throttle:1,0.3', ['except' => ['update', 'reject', 'showNewsByTopics', 'searchNewsByNewsTitle', 'openNewsPicture', 'checkNewsExist', 'detail', 'showNewsByUserId', 'readingNews', 'showNewsBySubTopicsAndTopics', 'showNewsByOneTopic', 'index']]);
+        $this->middleware('throttle:1,0.3', ['except' => ['update', 'showRelatedNews', 'reject', 'showNewsByTopics', 'searchNewsByNewsTitle', 'openNewsPicture', 'checkNewsExist', 'detail', 'showNewsByUserId', 'readingNews', 'showNewsBySubTopicsAndTopics', 'showNewsByOneTopic', 'index']]);
     }
 
     public function index()
@@ -102,6 +101,7 @@ class NewsController extends Controller
                     "actionURL" => "http://localhost:3006/",
                     "thanks" => "Thank you for your participation",
                 ];
+                $user->notify(new EmailNewsApprovalNotification($email_data));
                 $delete_news_approval = AdminNewsApproval::find($approval_id);
                 $delete_news_approval->delete();
                 $created_news = News::create($data);
@@ -154,37 +154,19 @@ class NewsController extends Controller
     public function showNewsByTopics()
     {
         DB::enableQueryLog();
-        // $distincts = DB::select(DB::raw("SELECT DISTINCT `topic_id` FROM `sub_topics`"));
-        // $arrayOfTopicIdsInSubTopics = array();
-        // for ($i = 0; $i < count($distincts); $i++) {
-        //     $arrayOfTopicIdsInSubTopics[$i] = $distincts[$i]->topic_id;
-        // }
-        $news = Topics::with("news")->get();
-        // $news_test = News::join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")->whereIn("sub_topic_id", $arrayOfTopicIdsInSubTopics)->get();
-        // $topicsByTopicId = Topics::whereIn("id", $arrayOfTopicIdsInSubTopics)->get();
-        // $arrayOfNews = array("" => $topicsByTopicId, "news" => $news_test);
-        // dump(DB::getQueryLog());
+        $news = Topics::with(["news" => function ($query) {
+            $query->select("news.*", "sub_topics.*");
+        }])->get();
         return response()->json($news, 200);
     }
     // For home page in topic_home, visitor
     public function showNewsByOneTopic($topic_slug)
     {
         DB::enableQueryLog();
-
-        $topic = Topics::where("topic_slug", $topic_slug)->first();
-        $join_news = News::join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")
-            ->select(
-                "news.*",
-                "sub_topics.sub_topic_title",
-                "sub_topics.added_at as sub_topic_added_at",
-                "sub_topics.updated_at as sub_topic_updated_at"
-            )
-            ->where("sub_topics.topic_id", $topic->id)
-            ->get();
-        if ($join_news->count() == 0) {
-            return response(404, "Not found");
-        }
-        return response($join_news, 200);
+        $news = Topics::with(["news" => function ($query) {
+            $query->select("news.*", "sub_topics.*");
+        }])->where("topic_slug", $topic_slug)->get();
+        return response()->json($news, 200);
     }
     public function showNewsBySubTopicsAndTopics(string $sub_topic_slug)
     {
@@ -253,10 +235,15 @@ class NewsController extends Controller
         $topic = Topics::find($join_news->topic_id);
         return response()->json(["news" => $join_news, "topics" => $topic], 200);
     }
-    public function getSubTopicByTopic(int $topic_id)
+    public function showRelatedNews($news_slug)
     {
-        $sub_topic = SubTopics::where("topic_id", $topic_id);
-        return response()->json(["sub_topics" => $sub_topic, "status_code" => 200],);
+        $relatedNews = DB::select(DB::raw("SELECT news.*,`sub_topics`.`id`,`sub_topics`.`sub_topic_title`,`sub_topics`.`sub_topic_slug`, `topics`.`topic_title`,`topics`.`topic_slug` FROM `news`
+        INNER JOIN `sub_topics` ON `sub_topics`.`id` = `news`.`sub_topic_id`
+        INNER JOIN `topics` ON  `topics`.id = `sub_topics`.`topic_id` WHERE NOT  `news_slug` = :news_slug"), [strval($news_slug)]);
+        return response()->json($relatedNews, 200);
+        // $relateNews = Topics::with("news")->whereNot(function ($query) {
+        //     $query->select("news.*", "topics.*", "sub_topics.*")->where("sub_topics",$sub_topic_slug);
+        // })->get();
     }
     public function openNewsPicture($news_id)
     {
@@ -271,10 +258,8 @@ class NewsController extends Controller
         );
         return readfile($news->news_picture_path . "/" . $news->news_picture_name);
     }
-
     public function updateNews(Request $request, int $news_id)
     {
-
         $news = News::where("id", $news_id)->get();
         $update_news = News::findOrFail($news_id);
         $news_title = ucwords($request->news_title);

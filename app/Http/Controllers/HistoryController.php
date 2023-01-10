@@ -16,21 +16,22 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class HistoryController extends Controller
 {
-
-
-
-    public function index($id = 'all')
+    public function index($user_id)
     {
-        if ($id == 'all') {
-            $history = History::with('news', 'user')->get();
-        } else {
-            $history = History::with('news', 'user')->where('user_id', $id)->get();
-        }
+        // if (count(History::where("user_id", intval($user_id))->get()) == 0) {
+        //     return response(404, "User id not found");
+        // }
+        $history = History::with('news', 'user')->where('user_id', intval($user_id))->orderBy("created_at", "asc")->get();
+        // $history = History::join("news", "news.id", "=", "history.news_id")->join("users", "users.id", "=", "history.user_id")
+        //     ->select("history.id", "history.created_at", "users.name", "news.news_title", "news.news_content", "news.news_picture_link", "news.news_picture_name")
+        //     ->where('history.user_id', intval($user_id))->orderBy("created_at", "asc")->paginate(3);
         return response()->json(["history" => $history, "status" => "Success", "message" => "Succeed"], 202);
     }
 
-    public function store(int $user_id, int $news_id)
+    public function store(Request $request)
     {
+        $news_id = $request->news_id;
+        $user_id = $request->user_id;
         if (!isset($user_id)) {
             return response()->json(["status" => "Failed", "message" => "user_id empty"], 400);
         }
@@ -44,13 +45,20 @@ class HistoryController extends Controller
             return response()->json(["status" => "Failed", "message" => "news not found"], 400);
         }
         try {
-            History::create([
-                'user_id' => $user_id,
-                'news_id' => $news_id
-            ]);
-            return response()->json(["status" => "Success", "message" => "History stored"], 200);
+            $news = History::where("news_id", $news_id)->get();
+            if (sizeof($news) == 0) {
+                $history_created = History::create([
+                    'created_at' => round(microtime(true) * 1000),
+                    'user_id' => $user_id,
+                    'news_id' => $news_id
+                ]);
+                return response()->json(["data" => $history_created, "status" => "Success", "message" => "History stored"], 200);
+            } else {
+                $history_updated = History::where("news_id", $news)->update(["created_at" => round(microtime(true) * 1000)]);
+                return response()->json(["data" => $history_updated, "status" => "Success", "message" => "History stored"], 200);
+            }
         } catch (\Exception $e) {
-            return response()->json(["status" => "Failed", "message" => "DB Error"], 400);
+            return response()->json(["status" => "Failed", "message" => $e->getMessage()], 400);
         }
     }
 

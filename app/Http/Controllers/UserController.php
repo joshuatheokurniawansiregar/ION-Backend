@@ -158,7 +158,8 @@ class UserController extends Controller
     {
         $author = User::find(intval($id));
         $admin_approval = AdminApproval::where("user_id", $id)->first();
-        return response()->json(["author" => [$author], "admin_approval" => $admin_approval], 202);
+        $AuthorAndPaidNews = News::join("users", "users.id", "=", "news.user_id")->where(["users.id" => intval($id), "news.news_status" => "Paid"])->get();
+        return response()->json(["author" => [$author], "admin_approval" => $admin_approval, "author_with_paid_news" => $AuthorAndPaidNews], 202);
     }
 
     public function createAuthorReceivingAccount(Request $request, int $user_id)
