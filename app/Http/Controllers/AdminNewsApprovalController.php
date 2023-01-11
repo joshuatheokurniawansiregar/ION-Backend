@@ -55,7 +55,7 @@ class AdminNewsApprovalController extends Controller
         } else {
             $counter = 1;
             if (AdminNewsApproval::where("user_id", intval($user_id))->count() >= 2) {
-                $response = response()->json(["authors" => $news_data, "status" => "Fail", "status_code" => 409, "message" => "You have created news more than two times"], 409);
+                $response = response()->json(["authors" => $news_data, "status" => "Fail", "status_code" => 409, "message" => "You have created news more than two times. Wait until we approve your news."], 409);
             } else {
                 $extension_test = File::extension($directory . "/" . "news_image/" . $file_name);
                 $current_counter_file = $base_name . "_" . $counter  . "." . $extension_test;

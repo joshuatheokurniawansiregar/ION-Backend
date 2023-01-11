@@ -43,9 +43,17 @@ class NewsController extends Controller
     // }
 
     //Admin
+    private string $randomTitle = "";
     public function __construct()
     {
         $this->middleware('throttle:1,0.3', ['except' => ['update', 'showRelatedNews', 'reject', 'showNewsByTopics', 'searchNewsByNewsTitle', 'openNewsPicture', 'checkNewsExist', 'detail', 'showNewsByUserId', 'readingNews', 'showNewsBySubTopicsAndTopics', 'showNewsByOneTopic', 'index']]);
+    }
+
+    public function  random_string(): string
+    {
+        $characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        $random = substr(md5(str_shuffle($characters)), 0, 7);
+        return $random;
     }
 
     public function index()
@@ -265,7 +273,7 @@ class NewsController extends Controller
         $news_title = ucwords($request->news_title);
         $news_content = $request->news_content;
         $sub_topic_id = $request->sub_topic_id;
-        if ($request->file("image_file") != null) {
+        if ($request->file("image_file")->getClientOriginalName() != null) {
             $file_image = $request->file("image_file");
             $directory = "storage";
             $file_name = $file_image->getClientOriginalName();
@@ -275,7 +283,8 @@ class NewsController extends Controller
             $extension_test = File::extension($file_name);
             $current_counter_file = $base_name . "_" . $counter  . "." . $extension_test;
             if (File::exists($news->value("news_picture_path") . "/" . $news->value("news_picture_name"))) {
-                File::delete($news->value("news_picture_path") . "/" . $news->value("news_picture_name"));
+                // File::delete($news->value("news_picture_path") . "/" . $news->value("news_picture_name"));
+                die();
             }
             if (File::exists($directory . "/" . "news_image/" . $file_name)) {
                 if (File::exists($directory . "/" . "news_image/" . $current_counter_file)) {
@@ -292,22 +301,30 @@ class NewsController extends Controller
                 $file_name = $file_image->getClientOriginalName();
             }
             $image_url_directory = stripslashes($request->schemeAndHttpHost() . "/" . $directory . "/news_image" . "/" . $file_name);
-            $data["news_picture_link"] = $image_url_directory;
-            $data["news_picture_name"] = $file_name;
             File::move($file_image, $directory . "/" . "news_image/" . $file_name);
             // $request->file('file_image')->move($directory . "/" . "news_image/", $file_name);
             dd('asd');
+            $data["news_title"] = $news_title;
+            $data["news_content"] = $news_content ?? '-';
+            $data["news_slug"] = preg_replace("/\s+/", "-", strtolower($news_title)) . '-' . $this->random_string();
+            $data["news_picture_link"] = $image_url_directory;
+            $data["news_picture_name"] = $file_name;
+            $news_data["news_picture_path"] = preg_replace("/\s+/", "", strtolower("storage/news_image"));
+            $data['sub_topic_id'] = $sub_topic_id;
+            $updated_at = round(microtime(true) * 1000); // GOBLOOOOOKKKKKKKKKKKKKKKKKKKKKK
+            $data["updated_at"] = $updated_at;
+            // $update_news->fill($data);
+            News::findOrFail($news_id)->update($data);
+            return response()->json(["news" => $data, "status_code" => 200], 200);
+        } else {
+            $data["news_title"] = $news_title;
+            $data["news_content"] = $news_content ?? '-';
+            $data["news_slug"] = preg_replace("/\s+/", "-", strtolower($news_title)) . '-' . $this->random_string();
+            $updated_at = round(microtime(true) * 1000); // GOBLOOOOOKKKKKKKKKKKKKKKKKKKKKK
+            $data["updated_at"] = $updated_at;
+            $data['sub_topic_id'] = $sub_topic_id;
+            News::findOrFail($news_id)->update($data);
         }
-        $data["news_title"] = $news_title;
-        $data["news_content"] = $news_content ?? '-';
-        $characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        $data["news_slug"] = preg_replace("/\s+/", "-", strtolower($news_title)) . '-' . substr(md5(str_shuffle($characters)), 0, 10);
-        $updated_at = round(microtime(true) * 1000); // GOBLOOOOOKKKKKKKKKKKKKKKKKKKKKK
-        $data["updated_at"] = $updated_at;
-        $data['sub_topic_id'] = $sub_topic_id;
-        $update_news->fill($data);
-        $update_news->save();
-        return response()->json(["news" => $data, "status_code" => 200], 200);
     }
 
     public function delete(int $news_id)
